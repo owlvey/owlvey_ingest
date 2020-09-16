@@ -15,6 +15,19 @@ class IngestComponent:
         self.output_daily = None
         self.output_month = None
         self.output_slo_month = None
+        self.output_hourly = None
+
+    def generate_hourly(self): 
+        self.output_hourly = self.data.groupby(
+            ['Source', 'year', 'month', 'month_name', 'week', 'weekday', 'day', 'hour']).agg({
+            'total': 'sum',
+            'ava': 'sum',
+            'exp': 'sum',
+            'lat': 'mean'
+        })
+        self.output_hourly['ava_prop'] = self.output_hourly['ava'].divide(self.output_hourly['total'])
+        self.output_hourly['exp_prop'] = self.output_hourly['exp'].divide(self.output_hourly['total'])
+        self.output_hourly.replace([np.inf, -np.inf], 0)
 
     def generate_daily(self):
         self.output_daily = self.data.groupby(
@@ -52,10 +65,11 @@ class IngestComponent:
 
         merged = merged.merge(self.indicators, left_on='Feature', 
             right_on='Feature', how='left')
-            
+
         merged = merged.merge(self.sources, left_on='Source', 
             right_on='Source', how='left')
         
+        self.generate_hourly()
         self.generate_daily()
         self.generate_month()
 
@@ -63,6 +77,7 @@ class IngestComponent:
             left_on='Source', 
             right_on='Source', how='left')
 
+        self.file_gateway.write_hourly(self.output_hourly)
         self.file_gateway.write_daily(self.output_daily)
         self.file_gateway.write_month(self.output_month)
         self.file_gateway.write_group_month(self.output_slo_month)

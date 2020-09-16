@@ -19,7 +19,7 @@ class FileGateway:
         data['week'] = data['start'].dt.strftime('%V')
         data['day'] = data['start'].dt.strftime('%e')
         data['weekday'] = data['start'].dt.strftime('%a')
-        data['hour'] = data['start'].dt.strftime('%H')
+        data['hour'] = data['start'].dt.strftime('%h')
         
         return data
     
@@ -50,6 +50,10 @@ class FileGateway:
         indicators = indicators.drop(columns=['Organization', 'Product'])
         return journeys, journeyMaps, features, indicators, sources
 
+    def write_hourly(self, frame):
+        target = os.path.join(self.base_directory, './output/hourly_data.csv')
+        frame.to_csv(target, sep=";")
+    
     def write_daily(self, frame):
         target = os.path.join(self.base_directory, './output/daily_data.csv')
         frame.to_csv(target, sep=";")
