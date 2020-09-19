@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 
 class FileGateway: 
 
@@ -20,7 +21,8 @@ class FileGateway:
         data['day'] = data['start'].dt.strftime('%e')
         data['weekday'] = data['start'].dt.strftime('%a')
         data['hour'] = data['start'].dt.strftime('%h')
-        
+        data = data.astype({"day": int})
+        data['fortnight'] = np.where(data["day"] <= 15, 0, 1)
         return data
     
     def read_metadata(self):
@@ -58,12 +60,16 @@ class FileGateway:
         target = os.path.join(self.base_directory, './output/daily_data.csv')
         frame.to_csv(target, sep=";")
     
+    def write_fortnight(self, frame):
+        target = os.path.join(self.base_directory, './output/fortnight_data.csv')
+        frame.to_csv(target, sep=";")
+    
     def write_month(self, frame):
         target = os.path.join(self.base_directory, './output/month_data.csv')
         frame.to_csv(target, sep=";")
     
-    def write_group_month(self, frame):
-        target = os.path.join(self.base_directory, './output/slo_month_data.csv')
+    def write_slo_group(self, frame):
+        target = os.path.join(self.base_directory, './output/slo_daily_data.csv')
         frame.to_csv(target, sep=";", index=False)
 
     
