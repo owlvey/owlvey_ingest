@@ -54,19 +54,23 @@ class FileGateway:
 
     def write_hourly(self, frame):
         target = os.path.join(self.base_directory, './output/hourly_data.csv')
-        frame.to_csv(target, sep=";")
+        frame.to_csv(target, sep=";", index=False)
     
     def write_daily(self, frame):
         target = os.path.join(self.base_directory, './output/daily_data.csv')
-        frame.to_csv(target, sep=";")
+        frame.to_csv(target, sep=";", index=False)
     
     def write_fortnight(self, frame):
         target = os.path.join(self.base_directory, './output/fortnight_data.csv')
-        frame.to_csv(target, sep=";")
+        frame.to_csv(target, sep=";", index=False)
+    
+    def write_fortnight_summary(self, frame):
+        target = os.path.join(self.base_directory, './output/fortnight_summary_data.csv')
+        frame.to_csv(target, sep=";", index=False)
     
     def write_month(self, frame):
         target = os.path.join(self.base_directory, './output/month_data.csv')
-        frame.to_csv(target, sep=";")
+        frame.to_csv(target, sep=";", index=False)
     
     def write_slo_group(self, frame):
         target = os.path.join(self.base_directory, './output/slo_daily_data.csv')

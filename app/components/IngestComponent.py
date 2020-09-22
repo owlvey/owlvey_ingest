@@ -17,6 +17,7 @@ class IngestComponent:
         self.output_slo = None
         self.output_hourly = None
         self.output_fortnight = None
+        self.output_fortnight_summary = None
 
     def generate_hourly(self): 
         self.output_hourly = self.data.groupby(
@@ -60,10 +61,23 @@ class IngestComponent:
             'total': 'sum',
             'ava': 'sum',
             'exp': 'sum',
-            'lat': 'mean',
-            'ava_prop': 'mean', 
-            'exp_prop': 'mean'
+            'lat': 'mean'
         }).reset_index()
+        self.output_fortnight['ava_prop'] = self.output_fortnight['ava'].divide(self.output_fortnight['total'])
+        self.output_fortnight['exp_prop'] = self.output_fortnight['exp'].divide(self.output_fortnight['total'])
+        self.output_fortnight.replace([np.inf, -np.inf], 0)
+
+
+        self.output_fortnight_summary = self.output_fortnight.groupby(
+            ['year', 'month', 'month_name', 'fortnight']
+        ).agg({
+            'total': 'sum',
+            'ava': 'sum',
+            'exp': 'sum',
+            'lat': 'mean'
+        }).reset_index()
+        self.output_fortnight_summary['ava_prop'] = self.output_fortnight_summary['ava'].divide(self.output_fortnight_summary['total'])
+        self.output_fortnight_summary['exp_prop'] = self.output_fortnight_summary['exp'].divide(self.output_fortnight_summary['total'])
         self.output_fortnight.replace([np.inf, -np.inf], 0)
     
     def generate_fortnight_summary(self):
@@ -119,7 +133,7 @@ class IngestComponent:
         self.file_gateway.write_fortnight(self.output_fortnight)
         self.file_gateway.write_month(self.output_month)
         self.file_gateway.write_slo_group(self.output_slo)
-        
+        self.file_gateway.write_fortnight_summary(self.output_fortnight_summary)
         
 
     
