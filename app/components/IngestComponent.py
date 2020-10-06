@@ -92,32 +92,34 @@ class IngestComponent:
         }).reset_index()
         self.output_fortnight.replace([np.inf, -np.inf], 0)
 
-    
     def generate_slo(self):
         self.journeys, self.journeyMaps, self.features, self.indicators, self.sources = self.file_gateway.read_metadata()
         
+        
         merged = self.journeys.merge(self.journeyMaps, left_on='Journey', 
             right_on='Journey', how='left')
-
+        
         merged = merged.merge(self.features, left_on='Feature', 
             right_on='Feature', how='left')
-
+        
         merged = merged.merge(self.indicators, left_on='Feature', 
             right_on='Feature', how='left')
-
+        
         merged = merged.merge(self.sources, left_on='Source', 
             right_on='Source', how='left')
 
-        self.output_slo = merged.merge(self.output_daily, left_on='Source', right_on='Source', how='left')
+        self.output_slo = merged.merge(self.output_month, left_on='Source', right_on='Source', how='left')
 
-        self.output_slo["ava_debt"] =  self.output_slo["ava_prop"] - self.output_slo["AvailabilitySlo"]
-        self.output_slo["ava_debt"] = np.where(self.output_slo["ava_debt"] < 0, self.output_slo["ava_debt"], 0)
+        self.output_slo["ava_debt"] = self.output_slo["ava_prop"] - self.output_slo["AvailabilitySlo"]
+        self.output_slo["ava_debt"] = abs(np.where(self.output_slo["ava_debt"] < 0, -1 * self.output_slo["ava_debt"], 0))
 
-        self.output_slo["exp_debt"] =  self.output_slo["exp_prop"] - self.output_slo["ExperienceSlo"]
-        self.output_slo["exp_debt"] = np.where(self.output_slo["exp_debt"] < 0, self.output_slo["exp_debt"], 0)
+        self.output_slo["exp_debt"] = self.output_slo["exp_prop"] - self.output_slo["ExperienceSlo"]
+        self.output_slo["exp_debt"] = abs(np.where(self.output_slo["exp_debt"] < 0, -1 * self.output_slo["exp_debt"], 0))
 
-        self.output_slo["lat_debt"] =  self.output_slo["lat"] - self.output_slo["LatencySlo"]
-        self.output_slo["lat_debt"] = np.where(self.output_slo["lat_debt"] < 0, self.output_slo["lat_debt"], 0)
+        self.output_slo["lat_debt"] = self.output_slo["lat"] - self.output_slo["LatencySlo"]
+        self.output_slo["lat_debt"] = abs(np.where(self.output_slo["lat_debt"] < 0, -1 * self.output_slo["lat_debt"], 0))
+
+       
         
     def generate_outputs(self):
         self.data = self.file_gateway.read_data()
